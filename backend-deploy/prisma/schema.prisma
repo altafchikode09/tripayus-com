@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  password       String
+  name           String
+  role           String   @default("analyst") // admin, analyst, client
+  organizationId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  deals       Deal[]
+  documents   Document[]
+  auditLogs   AuditLog[]
+  folders     Folder[]
+  docVersions DocumentVersion[]
+}
+
+model Deal {
+  id              String   @id @default(uuid())
+  name            String   @default("Untitled Deal")
+  companyName     String?
+
+  // Inputs
+  revenue         Float    @default(0)
+  ebitda          Float    @default(0)
+  entryMultiple   Float    @default(0)
+  debt            Float    @default(0)
+  exitMultiple    Float    @default(0)
+  holdingPeriod   Float    @default(0)
+  growthRate      Float    @default(0)
+
+  // Calculated outputs
+  enterpriseValue Float?
+  equityValue     Float?
+  projectedIrr    Float?
+  moic            Float?
+  leverage        Float?
+  exitValue       Float?
+
+  createdBy       String
+  user            User     @relation(fields: [createdBy], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  documents       Document[]
+  folders         Folder[]
+  risks           Risk[]
+  tasks           Task[]
+  memos           Memo[]
+
+  @@index([createdBy])
+  @@index([updatedAt])
+}
+
+model Document {
+  id             String   @id @default(uuid())
+  name           String
+  originalName   String
+  size           String
+  mimeType       String
+  path           String
+  status         String   @default("pending")
+  category       String   @default("other")
+  classification String   @default("General Document")
+  confidence     Int      @default(0)
+
+  dealId         String
+  deal           Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  uploadedBy     String
+  user           User     @relation(fields: [uploadedBy], references: [id])
+
+  folderId       String?
+  folder         Folder?  @relation(fields: [folderId], references: [id])
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  versions       DocumentVersion[]
+
+  @@index([dealId])
+  @@index([category])
+}
+
+model DocumentVersion {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version    Int
+  name       String
+  size       String
+  path       String
+  createdBy  String
+  user       User     @relation(fields: [createdBy], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([documentId])
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  dealId    String
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  createdBy String
+  user      User     @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
+
+  documents Document[]
+
+  @@unique([dealId, name])
+  @@index([dealId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   Json     @default("{}")
+  ipAddress  String?
+  userAgent  String?
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+model Risk {
+  id          String   @id @default(uuid())
+  dealId      String
+  deal        Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title       String
+  severity    String   @default("medium") // critical, warning, ok
+  amount      Float    @default(0)
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([dealId])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  dealId      String
+  deal        Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title       String
+  status      String   @default("pending")
+  assigneeId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dealId])
+}
+
+model Memo {
+  id          String   @id @default(uuid())
+  dealId      String
+  deal        Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  title       String
+  content     String?
+  status      String   @default("draft")
+  progress    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dealId])
+}
