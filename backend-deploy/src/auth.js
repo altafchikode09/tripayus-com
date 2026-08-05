@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { prisma } from '../db.js'
+import { prisma } from './db.js'
 
 export const authenticate = async (req, res, next) => {
   try {
