@@ -328,7 +328,8 @@ export default function App() {
               <div className="input-group"><label>Growth Rate (%)</label><input type="number" step="0.1" value={selectedDeal?.growthRate || 0} onChange={e => handleUpdateDeal('growthRate', e.target.value)} /></div>
               <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
                 <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleCreateDeal}>New Deal</button>
-                <button className="btn btn-primary" style={{ flex: 2 }} onClick={handleCalculate}>Calculate Deal</button>
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSaveDeal}>💾 Save Deal</button>
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleCalculate}>Calculate Deal</button>
               </div>
             </div>
             <div className="sidebar-card">
