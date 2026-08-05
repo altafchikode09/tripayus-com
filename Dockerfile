@@ -11,7 +11,7 @@ COPY backend-deploy/package*.json ./
 COPY backend-deploy/prisma ./prisma/
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Generate Prisma Client
 RUN npx prisma generate
