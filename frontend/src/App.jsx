@@ -128,14 +128,39 @@ export default function App() {
     }
   }
 
-  const handleUpdateDeal = async (field, value) => {
-    if (!selectedDeal) return
-    const updated = { ...selectedDeal, [field]: parseFloat(value) || value }
-    setSelectedDeal(updated)
+  const handleUpdateDeal = (field, value) => {
+    setSelectedDeal(prev => {
+      if (!prev) {
+        prev = {
+          id: 'temp-' + Date.now(),
+          companyName: '', revenue: 0, ebitda: 0,
+          entryMultiple: 0, debt: 0, exitMultiple: 0,
+          holdingPeriod: 0, growthRate: 0
+        }
+      }
+      const numFields = ['revenue','ebitda','entryMultiple','debt','exitMultiple','holdingPeriod','growthRate']
+      const isNum = numFields.includes(field)
+      const newVal = isNum ? (value === '' ? 0 : Number(value)) : value
+      return { ...prev, [field]: newVal }
+    })
+  }
+
+  const handleSaveDeal = async () => {
+    if (!selectedDeal) return showToast('Nothing to save', '⚠️')
     try {
-      const payload = field === 'companyName' ? { [field]: value } : { [field]: parseFloat(value) || 0 }
-      await api.put(`/deals/${selectedDeal.id}`, payload)
-    } catch (e) {}
+      if (String(selectedDeal.id).startsWith('temp-')) {
+        const { data } = await api.post('/deals', selectedDeal)
+        setSelectedDeal(data)
+        setDeals(prev => [...prev, data])
+        showToast('Deal created', '✅')
+      } else {
+        await api.put(`/deals/${selectedDeal.id}`, selectedDeal)
+        showToast('Deal saved', '✅')
+      }
+      loadDeals()
+    } catch (e) {
+      showToast(e.response?.data?.error || 'Save failed', '❌')
+    }
   }
 
   const handleCalculate = async () => {
