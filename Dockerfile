@@ -7,8 +7,8 @@ RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 # Copy package files first (better caching)
-COPY package*.json ./
-COPY prisma ./prisma/
+COPY backend-deploy/package*.json ./
+COPY backend-deploy/prisma ./prisma/
 
 # Install dependencies
 RUN npm ci --only=production
@@ -17,7 +17,7 @@ RUN npm ci --only=production
 RUN npx prisma generate
 
 # Copy application code
-COPY . .
+COPY backend-deploy/. .
 
 # Create uploads directory
 RUN mkdir -p uploads
