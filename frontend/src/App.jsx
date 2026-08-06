@@ -166,13 +166,21 @@ export default function App() {
   const handleCalculate = async () => {
     if (!selectedDeal) return showToast('Select or create a deal first', '⚠️')
     try {
-      const { data } = await api.post(`/deals/${selectedDeal.id}/calculate`)
+      let dealToCalc = selectedDeal
+      if (String(selectedDeal.id).startsWith('temp-')) {
+        const { data: saved } = await api.post('/deals', selectedDeal)
+        setSelectedDeal(saved)
+        dealToCalc = saved
+        setDeals(prev => [...prev.filter(d => d.id !== selectedDeal.id), saved])
+        showToast('Deal auto-saved before calculate', '✅')
+      }
+      const { data } = await api.post(`/deals/${dealToCalc.id}/calculate`)
       setCalcResult(data)
       showToast(`EV ${fmtMoney(data.ev)} · IRR ${fmtPct(data.irr)}`, '✅')
       const [sc, sen, fc] = await Promise.all([
-        api.get(`/deals/${selectedDeal.id}/scenarios`),
-        api.get(`/deals/${selectedDeal.id}/sensitivity`),
-        api.get(`/deals/${selectedDeal.id}/forecast`)
+        api.get(`/deals/${dealToCalc.id}/scenarios`),
+        api.get(`/deals/${dealToCalc.id}/sensitivity`),
+        api.get(`/deals/${dealToCalc.id}/forecast`)
       ])
       setScenarios(sc.data); setSensitivity(sen.data); setForecast(fc.data)
       loadDeals()
@@ -314,18 +322,18 @@ export default function App() {
               </div>
               <div className="input-group"><label>Target Company</label><input type="text" value={selectedDeal?.companyName || ''} onChange={e => handleUpdateDeal('companyName', e.target.value)} placeholder="e.g., Summit Industries" /></div>
               <div className="input-row">
-                <div className="input-group"><label>Revenue ($M)</label><input type="number" value={selectedDeal?.revenue || 0} onChange={e => handleUpdateDeal('revenue', e.target.value)} /></div>
-                <div className="input-group"><label>EBITDA ($M)</label><input type="number" value={selectedDeal?.ebitda || 0} onChange={e => handleUpdateDeal('ebitda', e.target.value)} /></div>
+                <div className="input-group"><label>Revenue ($M)</label><input type="number" value={selectedDeal?.revenue || ''} onChange={e => handleUpdateDeal('revenue', e.target.value)} /></div>
+                <div className="input-group"><label>EBITDA ($M)</label><input type="number" value={selectedDeal?.ebitda || ''} onChange={e => handleUpdateDeal('ebitda', e.target.value)} /></div>
               </div>
               <div className="input-row">
-                <div className="input-group"><label>Entry Multiple</label><input type="number" step="0.1" value={selectedDeal?.entryMultiple || 0} onChange={e => handleUpdateDeal('entryMultiple', e.target.value)} /></div>
-                <div className="input-group"><label>Debt ($M)</label><input type="number" value={selectedDeal?.debt || 0} onChange={e => handleUpdateDeal('debt', e.target.value)} /></div>
+                <div className="input-group"><label>Entry Multiple</label><input type="number" step="0.1" value={selectedDeal?.entryMultiple || ''} onChange={e => handleUpdateDeal('entryMultiple', e.target.value)} /></div>
+                <div className="input-group"><label>Debt ($M)</label><input type="number" value={selectedDeal?.debt || ''} onChange={e => handleUpdateDeal('debt', e.target.value)} /></div>
               </div>
               <div className="input-row">
-                <div className="input-group"><label>Exit Multiple</label><input type="number" step="0.1" value={selectedDeal?.exitMultiple || 0} onChange={e => handleUpdateDeal('exitMultiple', e.target.value)} /></div>
-                <div className="input-group"><label>Holding (Years)</label><input type="number" value={selectedDeal?.holdingPeriod || 0} onChange={e => handleUpdateDeal('holdingPeriod', e.target.value)} /></div>
+                <div className="input-group"><label>Exit Multiple</label><input type="number" step="0.1" value={selectedDeal?.exitMultiple || ''} onChange={e => handleUpdateDeal('exitMultiple', e.target.value)} /></div>
+                <div className="input-group"><label>Holding (Years)</label><input type="number" value={selectedDeal?.holdingPeriod || ''} onChange={e => handleUpdateDeal('holdingPeriod', e.target.value)} /></div>
               </div>
-              <div className="input-group"><label>Growth Rate (%)</label><input type="number" step="0.1" value={selectedDeal?.growthRate || 0} onChange={e => handleUpdateDeal('growthRate', e.target.value)} /></div>
+              <div className="input-group"><label>Growth Rate (%)</label><input type="number" step="0.1" value={selectedDeal?.growthRate || ''} onChange={e => handleUpdateDeal('growthRate', e.target.value)} /></div>
               <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
                 <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleCreateDeal}>New Deal</button>
                 <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSaveDeal}>💾 Save Deal</button>
@@ -357,7 +365,7 @@ export default function App() {
                 { label: 'Enterprise Value', value: calcResult ? fmtMoney(calcResult.ev) : '—', sub: calcResult ? `${selectedDeal?.entryMultiple}x EBITDA` : 'Enter inputs & calculate' },
                 { label: 'Equity Value', value: calcResult ? fmtMoney(calcResult.equity) : '—', sub: calcResult ? `${((calcResult.equity/calcResult.ev)*100).toFixed(1)}% of EV` : 'Enter inputs & calculate' },
                 { label: 'Projected IRR', value: calcResult ? fmtPct(calcResult.irr) : '—', sub: 'Accuracy: 100%', color: 'var(--green)' },
-                { label: 'MOIC', value: calcResult ? fmtMult(calcResult.moic) : '—', sub: `${selectedDeal?.holdingPeriod || 0} yr hold`, color: 'var(--blue)' },
+                { label: 'MOIC', value: calcResult ? fmtMult(calcResult.moic) : '—', sub: `${selectedDeal?.holdingPeriod || ''} yr hold`, color: 'var(--blue)' },
                 { label: 'Net Debt / EBITDA', value: calcResult ? fmtMult(calcResult.leverage) : '—', sub: calcResult ? `$${selectedDeal?.debt}M / $${selectedDeal?.ebitda}M` : 'Enter inputs & calculate' },
                 { label: 'Exit Value', value: calcResult ? fmtMoney(calcResult.exitValue) : '—', sub: calcResult ? `Exit EBITDA $${calcResult.exitEbitda?.toFixed(1)}M` : 'Enter inputs & calculate', color: 'var(--purple)' }
               ].map((k, i) => (
