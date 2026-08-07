@@ -300,7 +300,7 @@ export default function App() {
 
       <div className="industry-selector">
         {['pe','realestate','ma','legal','healthcare','supplychain','insurance','vc'].map(ind => (
-          <div key={ind} className={"industry-chip " + (industry === ind ? 'active' : '')} onClick={() => setIndustry(ind)}>
+          <div key={ind} className={"industry-chip " + (industry === ind ? 'active' : '')} onClick={() => { setIndustry(ind); setSelectedDeal(null); }}>
             <span style={{ fontSize: 14 }}>◆</span>
             <span>{ind === 'pe' ? 'Private Equity' : ind === 'realestate' ? 'Real Estate' : ind === 'ma' ? 'M&A' : ind === 'supplychain' ? 'Supply Chain' : ind === 'vc' ? 'VC / Startups' : ind[0].toUpperCase() + ind.slice(1)}</span>
           </div>
@@ -325,7 +325,7 @@ export default function App() {
                   <option value="supplychain">SUPPLY CHAIN</option>
                   <option value="insurance">INSURANCE</option>
                   <option value="vc">VC / STARTUPS</option>
-                  {deals.map(d => <option key={d.id} value={d.id}>{d.name || d.companyName || d.id.slice(0,8)}</option>)}
+                  {deals.filter(d => d.name && d.name.trim() !== '' && d.name !== 'New Deal' && !d.name.toLowerCase().includes('untitled')).map(d => <option key={d.id} value={d.id}>{d.name || d.companyName || d.id.slice(0,8)}</option>)}
                 </select>
               </div>
               <div className="input-group"><label>Target Company</label><input type="text" value={selectedDeal?.companyName || ''} onChange={e => handleUpdateDeal('companyName', e.target.value)} placeholder="e.g., Summit Industries" /></div>
