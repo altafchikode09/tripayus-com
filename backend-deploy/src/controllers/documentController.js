@@ -70,7 +70,8 @@ export const documentController = {
 
   async list(req, res, next) {
     try {
-      const { dealId: dealId || null, category } = req.query
+      let { dealId, category } = req.query
+    dealId = dealId || null
       const where = {}
       if (dealId) where.dealId = dealId
       if (category) where.category = category
