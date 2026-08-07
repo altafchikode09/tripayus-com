@@ -28,19 +28,28 @@ function useToast() {
   return { showToast, Toast }
 }
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, onRegister }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isRegister, setIsRegister] = useState(false)
   const { showToast, Toast } = useToast()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await onLogin(email, password)
+      if (isRegister) {
+        await onRegister({ email, password, name })
+        showToast('Account created! Please log in.', '✅')
+        setIsRegister(false)
+        setName('')
+      } else {
+        await onLogin(email, password)
+      }
     } catch (err) {
-      showToast(err.response?.data?.error || 'Login failed', '❌')
+      showToast(err.response?.data?.error || (isRegister ? 'Registration failed' : 'Login failed'), '❌')
     } finally {
       setLoading(false)
     }
@@ -52,14 +61,21 @@ function LoginScreen({ onLogin }) {
         <div className="login-logo">TP</div>
         <h2>Tripay AI</h2>
         <p>Enterprise Due Diligence Intelligence Platform</p>
+        {isRegister && (
+          <input className="login-input" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" required={isRegister} />
+        )}
         <input className="login-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address" required />
         <input className="login-input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
         <button className="login-btn" type="submit" disabled={loading}>
-          {loading ? <span className="spinner" style={{ borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#050812' }} /> : 'Sign In'}
+          {loading ? <span className="spinner" style={{ borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#050812' }} /> : (isRegister ? 'Create Account' : 'Sign In')}
         </button>
-        <div className="login-demo">
-
-          <p style={{ marginTop: 4 }}>Roles: Admin | Analyst | Client</p>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <p style={{ color: 'var(--text-sec)', fontSize: 13, marginBottom: 8 }}>
+            {isRegister ? 'Already have an account?' : "Don't have an account?"}
+          </p>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsRegister(!isRegister)} style={{ width: '100%' }}>
+            {isRegister ? 'Back to Login' : 'Create Account'}
+          </button>
         </div>
       </form>
       <Toast />
@@ -269,7 +285,7 @@ export default function App() {
   ]
 
   if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'var(--gold)' }}><span className="spinner" style={{ width: 32, height: 32, marginRight: 12 }} />Loading...</div>
-  if (!user) return <LoginScreen onLogin={handleLogin} />
+  if (!user) return <LoginScreen onLogin={handleLogin} onRegister={register} />
 
   return (
     <div className="app-container">
