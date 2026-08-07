@@ -84,7 +84,7 @@ function LoginScreen({ onLogin, onRegister }) {
 }
 
 export default function App() {
-  const { user, login, logout, loading: authLoading } = useAuth()
+  const { user, login, register, logout, loading: authLoading } = useAuth()
   const { showToast, Toast } = useToast()
   const [tab, setTab] = useState('dashboard')
   const [industry, setIndustry] = useState('pe')
