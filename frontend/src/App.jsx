@@ -190,12 +190,12 @@ export default function App() {
   }
 
   const handleFileUpload = async (files) => {
-    if (!selectedDeal) return showToast('Select a deal first', '⚠️')
+    /* Upload without deal selection allowed */
     setUploading(true)
     for (const file of files) {
       const form = new FormData()
       form.append('file', file)
-      form.append('dealId', selectedDeal.id)
+      if (selectedDeal) form.append('dealId', selectedDeal.id)
       try {
         await api.post('/documents/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } })
         showToast(`Uploaded: ${file.name}`, '✅')
