@@ -116,7 +116,7 @@ export default function App() {
   const handleCreateDeal = async () => {
     try {
       const { data } = await api.post('/deals', {
-        name: 'New Deal', companyName: '',
+        name: '', companyName: '',
         revenue: 0, ebitda: 0, entryMultiple: 0, debt: 0,
         exitMultiple: 0, holdingPeriod: 0, growthRate: 0
       })
@@ -317,6 +317,14 @@ export default function App() {
                 <label>Select Deal</label>
                 <select className="login-input" style={{ marginBottom: 16 }} value={selectedDeal?.id || ''} onChange={e => setSelectedDeal(deals.find(d => d.id === e.target.value) || null)}>
                   <option value="">-- Create or Select --</option>
+                  <option value="pe">PRIVATE EQUITY</option>
+                  <option value="realestate">REAL ESTATE</option>
+                  <option value="ma">M&A</option>
+                  <option value="legal">LEGAL</option>
+                  <option value="healthcare">HEALTHCARE</option>
+                  <option value="supplychain">SUPPLY CHAIN</option>
+                  <option value="insurance">INSURANCE</option>
+                  <option value="vc">VC / STARTUPS</option>
                   {deals.map(d => <option key={d.id} value={d.id}>{d.name || d.companyName || d.id.slice(0,8)}</option>)}
                 </select>
               </div>
@@ -335,7 +343,7 @@ export default function App() {
               </div>
               <div className="input-group"><label>Growth Rate (%)</label><input type="number" step="0.1" value={selectedDeal?.growthRate || ''} onChange={e => handleUpdateDeal('growthRate', e.target.value)} /></div>
               <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleCreateDeal}>New Deal</button>
+                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={handleCreateDeal}>Create New Deal</button>
                 <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSaveDeal}>💾 Save Deal</button>
                 <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleCalculate}>Calculate Deal</button>
               </div>
