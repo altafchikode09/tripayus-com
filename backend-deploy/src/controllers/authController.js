@@ -67,7 +67,7 @@ export const authController = {
   async seedDemoUsers(req, res, next) {
     try {
       const demos = [
-        { email: 'admin@tripay.ai', password: 'admin123', name: 'Admin User', role: 'admin' },
+
         { email: 'sarah@tripay.ai', password: 'analyst123', name: 'Sarah Chen', role: 'analyst' },
         { email: 'mike@tripay.ai', password: 'analyst123', name: 'Michael Ross', role: 'analyst' },
         { email: 'client@acme.com', password: 'client123', name: 'Client Viewer', role: 'client' }

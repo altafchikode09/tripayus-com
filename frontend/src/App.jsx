@@ -29,8 +29,8 @@ function useToast() {
 }
 
 function LoginScreen({ onLogin }) {
-  const [email, setEmail] = useState('admin@tripay.ai')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { showToast, Toast } = useToast()
 
@@ -58,7 +58,7 @@ function LoginScreen({ onLogin }) {
           {loading ? <span className="spinner" style={{ borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#050812' }} /> : 'Sign In'}
         </button>
         <div className="login-demo">
-          <p>Demo: <code>admin@tripay.ai</code> / <code>admin123</code></p>
+
           <p style={{ marginTop: 4 }}>Roles: Admin | Analyst | Client</p>
         </div>
       </form>
