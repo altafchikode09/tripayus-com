@@ -36,7 +36,7 @@ export const documentController = {
           category: result.category,
           classification: result.classification,
           confidence: result.confidence,
-          dealId,
+          dealId: dealId || null,
           uploadedBy: req.user.id
         }
       })
@@ -54,11 +54,11 @@ export const documentController = {
 
       const folderName = getFolderLabel(result.category)
       let folder = await prisma.folder.findUnique({
-        where: { dealId_name: { dealId, name: folderName } }
+        where: { dealId_name: { dealId: dealId || null, name: folderName } }
       })
       if (!folder) {
         folder = await prisma.folder.create({
-          data: { name: folderName, dealId, createdBy: req.user.id }
+          data: { name: folderName, dealId: dealId || null, createdBy: req.user.id }
         })
       }
       await prisma.document.update({ where: { id: doc.id }, data: { folderId: folder.id } })
@@ -70,7 +70,7 @@ export const documentController = {
 
   async list(req, res, next) {
     try {
-      const { dealId, category } = req.query
+      const { dealId: dealId || null, category } = req.query
       const where = {}
       if (dealId) where.dealId = dealId
       if (category) where.category = category
