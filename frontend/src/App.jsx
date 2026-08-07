@@ -315,7 +315,12 @@ export default function App() {
               <div className="sidebar-title">◆ Deal Inputs</div>
               <div className="input-group">
                 <label>Select Deal</label>
-                <select className="login-input" style={{ marginBottom: 16 }} value={selectedDeal?.id || ''} onChange={e => setSelectedDeal(deals.find(d => d.id === e.target.value) || null)}>
+                <select className="login-input" style={{ marginBottom: 16 }} value={selectedDeal?.id || industry || ''} onChange={e => {
+                  const val = e.target.value;
+                  const inds = ['pe','realestate','ma','legal','healthcare','supplychain','insurance','vc'];
+                  if (inds.includes(val)) { setIndustry(val); setSelectedDeal(null); }
+                  else { setSelectedDeal(deals.find(d => d.id === val) || null); }
+                }}>
                   <option value="">-- Create or Select --</option>
                   <option value="pe">PRIVATE EQUITY</option>
                   <option value="realestate">REAL ESTATE</option>
